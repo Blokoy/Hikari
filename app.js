@@ -4,8 +4,10 @@ import { sentenceExamples, romajiWords, kanaRomaji } from './js/data/sentence-da
 import { escapeHtml, shuffleItems } from './js/utils.js';
 import { closeModals, openModal, showToast } from './js/modals.js';
 import { initializeNavigation } from './js/navigation.js';
+import { initializeDictionary } from './js/dictionary.js';
 
 initializeNavigation();
+initializeDictionary();
 
 document.querySelectorAll('[data-action="start-lesson"]').forEach((button) => button.addEventListener('click', () => openModal('lesson-modal')));
 document.querySelectorAll('[data-action="open-quiz"]').forEach((button) => button.addEventListener('click', () => { activeQuizQuestions = shuffleItems(quizQuestions); currentQuestion = 0; document.querySelector('#quiz-section').textContent = 'GENERAL'; clearKanaWorksheet(); loadQuestion(0); closeModals(); openModal('quiz-modal'); }));
@@ -158,12 +160,6 @@ document.querySelectorAll('[data-action="open-kana-quiz"]').forEach((button) => 
   closeModals();
   openModal('quiz-modal');
 }));
-
-const wordCards = document.querySelectorAll('.word-card');
-document.querySelector('#dictionary-input').addEventListener('input', (event) => {
-  const query = event.target.value.toLowerCase();
-  wordCards.forEach((card) => { card.hidden = query && !card.textContent.toLowerCase().includes(query); });
-});
 
 const sentenceInput = document.querySelector('#sentence-input');
 const checkerResult = document.querySelector('#checker-result');

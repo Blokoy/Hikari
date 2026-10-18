@@ -2,13 +2,23 @@
 """Inspect the JMdict and KANJIDIC JSON source shapes without downloading them."""
 
 import json
+import sys
 from pathlib import Path
 from typing import Any
 
 
 SOURCE_DIR = Path(__file__).parent / "source"
-JMdict_PATH = SOURCE_DIR / "jmdict-eng-3.6.2+20261012204142.json"
-KANJIDIC_PATH = SOURCE_DIR / "kanjidic2-en-3.6.2+20261012204142.json"
+
+
+def find_source(pattern: str) -> Path:
+    matches = list(SOURCE_DIR.glob(pattern))
+    if not matches:
+        raise FileNotFoundError(f"No files matched source pattern: {pattern}")
+    if len(matches) > 1:
+        chosen = max(matches, key=lambda path: path.stat().st_mtime)
+        print(f"Multiple files matched {pattern}; using newest: {chosen.name}")
+        return chosen
+    return matches[0]
 
 
 def load_json(path: Path) -> dict[str, Any]:
@@ -51,9 +61,11 @@ def print_source_summary(name: str, data: dict[str, Any], entries_key: str, samp
 
 
 def main() -> None:
-    jmdict = load_json(JMdict_PATH)
-    kanjidic = load_json(KANJIDIC_PATH)
-    jmdict_entries = jmdict.get("entries", [])
+    if hasattr(sys.stdout, "reconfigure"):
+        sys.stdout.reconfigure(encoding="utf-8")
+    jmdict = load_json(find_source("jmdict-eng*.json"))
+    kanjidic = load_json(find_source("kanjidic2-en*.json"))
+    jmdict_entries = jmdict.get("words", [])
     kanjidic_entries = kanjidic.get("characters", [])
     if not isinstance(jmdict_entries, list) or not isinstance(kanjidic_entries, list):
         raise ValueError("Unexpected source shape: entries/characters must be lists.")
@@ -67,7 +79,7 @@ def main() -> None:
     print_source_summary(
         "JMdict English",
         jmdict,
-        "entries",
+        "words",
         jmdict_sample,
     )
     print_source_summary(
@@ -79,4 +91,8 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except (FileNotFoundError, ValueError) as error:
+        print(f"Error: {error}", file=sys.stderr)
+        raise SystemExit(1)

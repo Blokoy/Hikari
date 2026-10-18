@@ -6,7 +6,7 @@ const sidebar = document.querySelector('.sidebar');
 const menuButton = document.querySelector('.menu-button');
 const sourceVerbSections = [...document.querySelectorAll('.verb-section')].filter((section) => !section.closest('#verbs-view'));
 sourceVerbSections.forEach((section) => { section.hidden = true; });
-const pageTitles = { home: 'Overview', path: 'Learning path', practice: 'Practice', dictionary: 'Dictionary', kana: 'Kana chart', kanji: 'Kanji bank', grammar: 'Grammar guide', n5: 'N5 essentials', numbers: 'Numbers chart', time: 'Telling time', calendar: 'Calendar words', questions: 'Question words', frequency: 'Frequency words', demonstratives: 'This / That', contrast: 'But / However', or: 'Or / Alternatives', adjectives: 'Adjective lessons', verbs: 'Verb lessons' };
+const pageTitles = { home: 'Overview', path: 'Learning path', practice: 'Practice', dictionary: 'Dictionary', checker: 'Sentence checker', kana: 'Kana chart', kanji: 'Kanji bank', grammar: 'Grammar guide', n5: 'N5 essentials', numbers: 'Numbers chart', time: 'Telling time', calendar: 'Calendar words', questions: 'Question words', frequency: 'Frequency words', demonstratives: 'This / That', contrast: 'But / However', or: 'Or / Alternatives', adjectives: 'Adjective lessons', verbs: 'Verb lessons' };
 
 function showView(viewName) {
   views.forEach((view) => view.classList.toggle('active-view', view.id === `${viewName}-view`));
@@ -238,5 +238,164 @@ document.querySelector('#dictionary-input').addEventListener('input', (event) =>
   const query = event.target.value.toLowerCase();
   wordCards.forEach((card) => { card.hidden = query && !card.textContent.toLowerCase().includes(query); });
 });
+
+const sentenceInput = document.querySelector('#sentence-input');
+const checkerResult = document.querySelector('#checker-result');
+const sentenceExamples = ['わたしは りんごを たべます。', 'きょうは がっこうに いきます。', 'わたしりんごたべます'];
+let sentenceExampleIndex = 0;
+
+function escapeHtml(value) {
+  return value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[character]);
+}
+
+function analyzeSentence(sentence) {
+  const errors = [];
+  const tips = [];
+  const trimmed = sentence.trim();
+  const addError = (start, end, message) => errors.push({ start, end, message });
+  const punctuationStart = trimmed.length ? sentence.lastIndexOf(trimmed) + trimmed.length - 1 : 0;
+
+  if (!trimmed) return { errors: [], tips: ['Start with a simple pattern such as わたしは りんごを たべます。'], structure: 'Topic は + detail + verb ます。' };
+  if (!/[。！？.!?]$/.test(trimmed)) {
+    addError(punctuationStart + 1, punctuationStart + 1, 'Finish the sentence with 。 or a question mark.');
+    tips.push('Add Japanese punctuation: 。 for a statement or ？ for a question.');
+  }
+  if (/(はは|がが|をを|にに|でで)/.test(trimmed)) {
+    const duplicate = trimmed.match(/(は|が|を|に|で)\1/);
+    const start = sentence.indexOf(duplicate[0]);
+    addError(start, start + duplicate[0].length, `Use ${duplicate[1]} only once here.`);
+    tips.push(`Check the repeated particle 「${duplicate[1]}」 and remove the extra one.`);
+  }
+  const missingObjectParticle = trimmed.match(/([一-龯ぁ-んァ-ン]+)(たべます|飲みます|のみます|見ます|みます|読みます|よみます|買います|かいます)([。！？.!?])?$/);
+  if (missingObjectParticle && !trimmed.includes('を')) {
+    const start = sentence.lastIndexOf(missingObjectParticle[1]);
+    addError(start, start + missingObjectParticle[1].length, 'This object needs を before the verb.');
+    tips.push(`Use 「${missingObjectParticle[1]}を${missingObjectParticle[2]}」 for an object + action.`);
+  }
+  if (/^[^。！？.!?]*(は|が)\s*$/.test(trimmed)) {
+    const start = sentence.lastIndexOf(trimmed);
+    addError(start, start + trimmed.length, 'Add information after the topic particle.');
+    tips.push('After は or が, add the detail you want to describe.');
+  }
+  if (!errors.length) {
+    tips.push('Nice structure. Try swapping the topic, object, or verb to make another sentence.');
+  }
+  let structure = 'Topic は + detail + verb ます。';
+  if (trimmed.includes('を')) structure = 'Topic は + object を + verb ます。';
+  if (trimmed.includes('に')) structure = 'Topic は + destination/time に + verb ます。';
+  if (trimmed.includes('です')) structure = 'Topic は + description + です。';
+  return { errors, tips, structure };
+}
+
+function highlightedSentence(sentence, errors) {
+  let output = '';
+  let cursor = 0;
+  errors.sort((first, second) => first.start - second.start).forEach((error) => {
+    if (error.start < cursor) return;
+    output += escapeHtml(sentence.slice(cursor, error.start));
+    output += `<mark title="${escapeHtml(error.message)}">${escapeHtml(sentence.slice(error.start, error.end) || '＿')}</mark>`;
+    cursor = error.end;
+  });
+  return output + escapeHtml(sentence.slice(cursor));
+}
+
+const romajiWords = {
+  '何がたべるの？': 'nani ga taberu no?',
+  '何が食べるの？': 'nani ga taberu no?',
+  '何が': 'nani ga',
+  '何を': 'nani o',
+  '何ですか': 'nan desu ka',
+  '食べます': 'tabemasu',
+  '食べる': 'taberu',
+  '飲みます': 'nomimasu',
+  '飲む': 'nomu',
+  '見ます': 'mimasu',
+  '見る': 'miru',
+  '読みます': 'yomimasu',
+  '読む': 'yomu',
+  '買います': 'kaimasu',
+  '買う': 'kau',
+  '行きます': 'ikimasu',
+  '行く': 'iku',
+  '来ます': 'kimasu',
+  '来る': 'kuru',
+  '帰ります': 'kaerimasu',
+  '帰る': 'kaeru',
+  '学校': 'gakkou',
+  '今日': 'kyou',
+  '明日': 'ashita',
+  '昨日': 'kinou',
+  '駅': 'eki',
+  '右': 'migi',
+  '左': 'hidari',
+  '道': 'michi',
+  '人': 'hito',
+  '本': 'hon',
+  '日本': 'nihon',
+  '先生': 'sensei',
+  '学生': 'gakusei',
+  '何': 'nani',
+  'わたしは': 'watashi wa',
+  'りんごを': 'ringo o',
+  'きょうは': 'kyou wa',
+  'がっこうに': 'gakkou ni',
+  'わたし': 'watashi',
+  'りんご': 'ringo',
+  'たべます': 'tabemasu',
+  'きょう': 'kyou',
+  'がっこう': 'gakkou',
+  'いきます': 'ikimasu',
+  'です': 'desu',
+  'ます': 'masu'
+};
+const kanaRomaji = {
+  'きゃ': 'kya', 'きゅ': 'kyu', 'きょ': 'kyo', 'しゃ': 'sha', 'しゅ': 'shu', 'しょ': 'sho',
+  'ちゃ': 'cha', 'ちゅ': 'chu', 'ちょ': 'cho', 'にゃ': 'nya', 'にゅ': 'nyu', 'にょ': 'nyo',
+  'ひゃ': 'hya', 'ひゅ': 'hyu', 'ひょ': 'hyo', 'みゃ': 'mya', 'みゅ': 'myu', 'みょ': 'myo',
+  'りゃ': 'rya', 'りゅ': 'ryu', 'りょ': 'ryo', 'じゃ': 'ja', 'じゅ': 'ju', 'じょ': 'jo',
+  'あ': 'a', 'い': 'i', 'う': 'u', 'え': 'e', 'お': 'o', 'か': 'ka', 'き': 'ki', 'く': 'ku', 'け': 'ke', 'こ': 'ko',
+  'さ': 'sa', 'し': 'shi', 'す': 'su', 'せ': 'se', 'そ': 'so', 'た': 'ta', 'ち': 'chi', 'つ': 'tsu', 'て': 'te', 'と': 'to',
+  'な': 'na', 'に': 'ni', 'ぬ': 'nu', 'ね': 'ne', 'の': 'no', 'は': 'ha', 'ひ': 'hi', 'ふ': 'fu', 'へ': 'he', 'ほ': 'ho',
+  'ま': 'ma', 'み': 'mi', 'む': 'mu', 'め': 'me', 'も': 'mo', 'や': 'ya', 'ゆ': 'yu', 'よ': 'yo', 'ら': 'ra', 'り': 'ri',
+  'る': 'ru', 'れ': 're', 'ろ': 'ro', 'わ': 'wa', 'を': 'wo', 'ん': 'n', 'が': 'ga', 'ぎ': 'gi', 'ぐ': 'gu', 'げ': 'ge',
+  'ご': 'go', 'ざ': 'za', 'じ': 'ji', 'ず': 'zu', 'ぜ': 'ze', 'ぞ': 'zo', 'だ': 'da', 'ぢ': 'ji', 'づ': 'zu', 'で': 'de',
+  'ど': 'do', 'ば': 'ba', 'び': 'bi', 'ぶ': 'bu', 'べ': 'be', 'ぼ': 'bo', 'ぱ': 'pa', 'ぴ': 'pi', 'ぷ': 'pu', 'ぺ': 'pe', 'ぽ': 'po',
+  'っ': ''
+};
+
+function toRomaji(sentence) {
+  return sentence.split(/(\s+)/).map((part) => {
+    if (/^\s+$/.test(part)) return part;
+    let converted = part;
+    Object.entries(romajiWords).sort(([first], [second]) => second.length - first.length).forEach(([word, reading]) => { converted = converted.replaceAll(word, reading); });
+    let output = '';
+    for (let index = 0; index < converted.length; index += 1) {
+      const pair = converted.slice(index, index + 2);
+      if (kanaRomaji[pair] !== undefined) {
+        output += kanaRomaji[pair];
+        index += 1;
+      } else {
+        output += kanaRomaji[converted[index]] || converted[index];
+      }
+    }
+    return output.replaceAll('。', '.').replaceAll('！', '!').replaceAll('？', '?');
+  }).join('');
+}
+
+function renderSentenceCheck() {
+  const sentence = sentenceInput.value;
+  const result = analyzeSentence(sentence);
+  const isCorrect = sentence.trim() && result.errors.length === 0;
+  checkerResult.innerHTML = `<div class="checker-status"><span class="checker-status-badge">${isCorrect ? '✓' : '!'}</span><div><strong>${isCorrect ? 'Looks good!' : sentence.trim() ? 'A few things to check' : 'Ready when you are'}</strong><span>${isCorrect ? 'Your sentence follows a clear beginner pattern.' : 'Read the highlighted part and try the tips below.'}</span></div></div>${sentence.trim() ? `<div class="checker-output">${highlightedSentence(sentence, result.errors)}<span class="romaji-line">${escapeHtml(toRomaji(sentence))}</span></div>` : '<p class="checker-empty">Your corrected sentence and romaji reading will appear here with highlighted feedback.</p>'}<h3>Tips to improve</h3><ul class="checker-list">${result.tips.map((tip) => `<li>${escapeHtml(tip)}</li>`).join('')}</ul><div class="structure-card"><strong>${escapeHtml(result.structure)}</strong><span>Suggested beginner structure</span></div>`;
+}
+
+document.querySelector('#check-sentence').addEventListener('click', renderSentenceCheck);
+sentenceInput.addEventListener('input', renderSentenceCheck);
+document.querySelector('#sentence-example').addEventListener('click', () => {
+  sentenceExampleIndex = (sentenceExampleIndex + 1) % sentenceExamples.length;
+  sentenceInput.value = sentenceExamples[sentenceExampleIndex];
+  renderSentenceCheck();
+});
+renderSentenceCheck();
 
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeModals(); });

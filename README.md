@@ -17,6 +17,7 @@ Hikari a lightweight Japanese study dashboard for building N5 foundations one cl
 - Vocabulary dictionary with live search
 - Hiragana and katakana charts with recall quizzes
 - N5 references for kanji, grammar, numbers, time, dates, question words, and more
+- Beginner Japanese sentence checker with inline highlights, correction tips, and suggested structures
 - Responsive layout for desktop and mobile
 
 ## Run locally

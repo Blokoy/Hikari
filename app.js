@@ -1,3 +1,7 @@
+import { quizQuestions, initialKanaQuizQuestions } from './js/data/quiz-data.js';
+import { kanaCharts, kanaCombinations } from './js/data/kana-data.js';
+import { sentenceExamples, romajiWords, kanaRomaji } from './js/data/sentence-data.js';
+
 const navItems = document.querySelectorAll('.nav-item');
 const views = document.querySelectorAll('.page-view');
 const breadcrumbTitle = document.querySelector('#breadcrumb-title');
@@ -37,22 +41,7 @@ document.querySelectorAll('[data-action="open-quiz"]').forEach((button) => butto
 document.querySelectorAll('[data-action="close-modal"]').forEach((button) => button.addEventListener('click', closeModals));
 document.querySelectorAll('.modal-backdrop').forEach((modal) => modal.addEventListener('click', (event) => { if (event.target === modal) closeModals(); }));
 
-const quizQuestions = [
-  { prompt: 'What does 駅 mean?', answers: [['Book', 'wrong'], ['Station', 'correct'], ['Right', 'wrong'], ['Way', 'wrong']], feedback: '駅 means station.' },
-  { prompt: 'What does 右 mean?', answers: [['Left', 'wrong'], ['Book', 'wrong'], ['Right', 'correct'], ['Station', 'wrong']], feedback: '右 means right.' }
-];
-let kanaQuizQuestions = {
-  hiragana: [
-    { prompt: 'Which sound is ね?', answers: [['ne', 'correct'], ['na', 'wrong'], ['nu', 'wrong'], ['no', 'wrong']], feedback: 'ね is read ne.' },
-    { prompt: 'Which hiragana is “shi”?', answers: [['さ', 'wrong'], ['し', 'correct'], ['す', 'wrong'], ['せ', 'wrong']], feedback: 'し is read shi.' },
-    { prompt: 'Which sound is ぷ?', answers: [['bu', 'wrong'], ['pa', 'wrong'], ['pu', 'correct'], ['po', 'wrong']], feedback: 'ぷ is read pu.' }
-  ],
-  katakana: [
-    { prompt: 'Which sound is ヌ?', answers: [['ne', 'wrong'], ['nu', 'correct'], ['na', 'wrong'], ['no', 'wrong']], feedback: 'ヌ is read nu.' },
-    { prompt: 'Which katakana is “to”?', answers: [['タ', 'wrong'], ['チ', 'wrong'], ['ツ', 'wrong'], ['ト', 'correct']], feedback: 'ト is read to.' },
-    { prompt: 'Which sound is パ?', answers: [['ba', 'wrong'], ['pa', 'correct'], ['pi', 'wrong'], ['po', 'wrong']], feedback: 'パ is read pa.' }
-  ]
-};
+let kanaQuizQuestions = initialKanaQuizQuestions;
 let activeQuizQuestions = quizQuestions;
 let currentQuestion = 0;
 
@@ -167,30 +156,6 @@ document.querySelector('#kana-worksheet').addEventListener('focusout', (event) =
   field.nextElementSibling.textContent = isCorrect ? 'Correct' : `Try ${expected}`;
 });
 
-const kanaCharts = {
-  hiragana: [
-    ['あ','a'],['い','i'],['う','u'],['え','e'],['お','o'],['か','ka'],['き','ki'],['く','ku'],['け','ke'],['こ','ko'],
-    ['さ','sa'],['し','shi'],['す','su'],['せ','se'],['そ','so'],['た','ta'],['ち','chi'],['つ','tsu'],['て','te'],['と','to'],
-    ['な','na'],['に','ni'],['ぬ','nu'],['ね','ne'],['の','no'],['は','ha'],['ひ','hi'],['ふ','fu'],['へ','he'],['ほ','ho'],
-    ['ま','ma'],['み','mi'],['む','mu'],['め','me'],['も','mo'],['や','ya'],['ゆ','yu'],['よ','yo'],['ら','ra'],['り','ri'],
-    ['る','ru'],['れ','re'],['ろ','ro'],['わ','wa'],['を','wo'],['ん','n'],['が','ga'],['ぎ','gi'],['ぐ','gu'],['げ','ge'],
-    ['ご','go'],['ざ','za'],['じ','ji'],['ず','zu'],['ぜ','ze'],['ぞ','zo'],['だ','da'],['ぢ','ji'],['づ','zu'],['で','de'],
-    ['ど','do'],['ば','ba'],['び','bi'],['ぶ','bu'],['べ','be'],['ぼ','bo'],['ぱ','pa'],['ぴ','pi'],['ぷ','pu'],['ぺ','pe'],['ぽ','po']
-  ],
-  katakana: [
-    ['ア','a'],['イ','i'],['ウ','u'],['エ','e'],['オ','o'],['カ','ka'],['キ','ki'],['ク','ku'],['ケ','ke'],['コ','ko'],
-    ['サ','sa'],['シ','shi'],['ス','su'],['セ','se'],['ソ','so'],['タ','ta'],['チ','chi'],['ツ','tsu'],['テ','te'],['ト','to'],
-    ['ナ','na'],['ニ','ni'],['ヌ','nu'],['ネ','ne'],['ノ','no'],['ハ','ha'],['ヒ','hi'],['フ','fu'],['ヘ','he'],['ホ','ho'],
-    ['マ','ma'],['ミ','mi'],['ム','mu'],['メ','me'],['モ','mo'],['ヤ','ya'],['ユ','yu'],['ヨ','yo'],['ラ','ra'],['リ','ri'],
-    ['ル','ru'],['レ','re'],['ロ','ro'],['ワ','wa'],['ヲ','wo'],['ン','n'],['ガ','ga'],['ギ','gi'],['グ','gu'],['ゲ','ge'],
-    ['ゴ','go'],['ザ','za'],['ジ','ji'],['ズ','zu'],['ゼ','ze'],['ゾ','zo'],['ダ','da'],['ヂ','ji'],['ヅ','zu'],['デ','de'],
-    ['ド','do'],['バ','ba'],['ビ','bi'],['ブ','bu'],['ベ','be'],['ボ','bo'],['パ','pa'],['ピ','pi'],['プ','pu'],['ペ','pe'],['ポ','po']
-  ]
-};
-const kanaCombinations = {
-  hiragana: [['きゃ','kya'],['きゅ','kyu'],['きょ','kyo'],['しゃ','sha'],['しゅ','shu'],['しょ','sho'],['ちゃ','cha'],['ちゅ','chu'],['ちょ','cho'],['にゃ','nya'],['にゅ','nyu'],['にょ','nyo'],['ひゃ','hya'],['ひゅ','hyu'],['ひょ','hyo'],['みゃ','mya'],['みゅ','myu'],['みょ','myo'],['りゃ','rya'],['りゅ','ryu'],['りょ','ryo'],['ぎゃ','gya'],['ぎゅ','gyu'],['ぎょ','gyo'],['じゃ','ja'],['じゅ','ju'],['じょ','jo'],['びゃ','bya'],['びゅ','byu'],['びょ','byo'],['ぴゃ','pya'],['ぴゅ','pyu'],['ぴょ','pyo']],
-  katakana: [['キャ','kya'],['キュ','kyu'],['キョ','kyo'],['シャ','sha'],['シュ','shu'],['ショ','sho'],['チャ','cha'],['チュ','chu'],['チョ','cho'],['ニャ','nya'],['ニュ','nyu'],['ニョ','nyo'],['ヒャ','hya'],['ヒュ','hyu'],['ヒョ','hyo'],['ミャ','mya'],['ミュ','myu'],['ミョ','myo'],['リャ','rya'],['リュ','ryu'],['リョ','ryo'],['ギャ','gya'],['ギュ','gyu'],['ギョ','gyo'],['ジャ','ja'],['ジュ','ju'],['ジョ','jo'],['ビャ','bya'],['ビュ','byu'],['ビョ','byo'],['ピャ','pya'],['ピュ','pyu'],['ピョ','pyo']]
-};
 function createCompleteKanaQuiz(script) {
   const entries = [...kanaCharts[script], ...kanaCombinations[script]];
   return entries.map(([character, sound], index) => {
@@ -241,7 +206,6 @@ document.querySelector('#dictionary-input').addEventListener('input', (event) =>
 
 const sentenceInput = document.querySelector('#sentence-input');
 const checkerResult = document.querySelector('#checker-result');
-const sentenceExamples = ['わたしは りんごを たべます。', 'きょうは がっこうに いきます。', 'わたしりんごたべます'];
 let sentenceExampleIndex = 0;
 
 function escapeHtml(value) {
@@ -298,70 +262,6 @@ function highlightedSentence(sentence, errors) {
   });
   return output + escapeHtml(sentence.slice(cursor));
 }
-
-const romajiWords = {
-  '何がたべるの？': 'nani ga taberu no?',
-  '何が食べるの？': 'nani ga taberu no?',
-  '何が': 'nani ga',
-  '何を': 'nani o',
-  '何ですか': 'nan desu ka',
-  '食べます': 'tabemasu',
-  '食べる': 'taberu',
-  '飲みます': 'nomimasu',
-  '飲む': 'nomu',
-  '見ます': 'mimasu',
-  '見る': 'miru',
-  '読みます': 'yomimasu',
-  '読む': 'yomu',
-  '買います': 'kaimasu',
-  '買う': 'kau',
-  '行きます': 'ikimasu',
-  '行く': 'iku',
-  '来ます': 'kimasu',
-  '来る': 'kuru',
-  '帰ります': 'kaerimasu',
-  '帰る': 'kaeru',
-  '学校': 'gakkou',
-  '今日': 'kyou',
-  '明日': 'ashita',
-  '昨日': 'kinou',
-  '駅': 'eki',
-  '右': 'migi',
-  '左': 'hidari',
-  '道': 'michi',
-  '人': 'hito',
-  '本': 'hon',
-  '日本': 'nihon',
-  '先生': 'sensei',
-  '学生': 'gakusei',
-  '何': 'nani',
-  'わたしは': 'watashi wa',
-  'りんごを': 'ringo o',
-  'きょうは': 'kyou wa',
-  'がっこうに': 'gakkou ni',
-  'わたし': 'watashi',
-  'りんご': 'ringo',
-  'たべます': 'tabemasu',
-  'きょう': 'kyou',
-  'がっこう': 'gakkou',
-  'いきます': 'ikimasu',
-  'です': 'desu',
-  'ます': 'masu'
-};
-const kanaRomaji = {
-  'きゃ': 'kya', 'きゅ': 'kyu', 'きょ': 'kyo', 'しゃ': 'sha', 'しゅ': 'shu', 'しょ': 'sho',
-  'ちゃ': 'cha', 'ちゅ': 'chu', 'ちょ': 'cho', 'にゃ': 'nya', 'にゅ': 'nyu', 'にょ': 'nyo',
-  'ひゃ': 'hya', 'ひゅ': 'hyu', 'ひょ': 'hyo', 'みゃ': 'mya', 'みゅ': 'myu', 'みょ': 'myo',
-  'りゃ': 'rya', 'りゅ': 'ryu', 'りょ': 'ryo', 'じゃ': 'ja', 'じゅ': 'ju', 'じょ': 'jo',
-  'あ': 'a', 'い': 'i', 'う': 'u', 'え': 'e', 'お': 'o', 'か': 'ka', 'き': 'ki', 'く': 'ku', 'け': 'ke', 'こ': 'ko',
-  'さ': 'sa', 'し': 'shi', 'す': 'su', 'せ': 'se', 'そ': 'so', 'た': 'ta', 'ち': 'chi', 'つ': 'tsu', 'て': 'te', 'と': 'to',
-  'な': 'na', 'に': 'ni', 'ぬ': 'nu', 'ね': 'ne', 'の': 'no', 'は': 'ha', 'ひ': 'hi', 'ふ': 'fu', 'へ': 'he', 'ほ': 'ho',
-  'ま': 'ma', 'み': 'mi', 'む': 'mu', 'め': 'me', 'も': 'mo', 'や': 'ya', 'ゆ': 'yu', 'よ': 'yo', 'ら': 'ra', 'り': 'ri',
-  'る': 'ru', 'れ': 're', 'ろ': 'ro', 'わ': 'wa', 'を': 'wo', 'ん': 'n', 'が': 'ga', 'ぎ': 'gi', 'ぐ': 'gu', 'げ': 'ge',
-  'ご': 'go', 'ざ': 'za', 'じ': 'ji', 'ず': 'zu', 'ぜ': 'ze', 'ぞ': 'zo', 'だ': 'da', 'ぢ': 'ji', 'づ': 'zu', 'で': 'de',
-  'ど': 'do', 'ば': 'ba', 'び': 'bi', 'ぶ': 'bu', 'べ': 'be', 'ぼ': 'bo', 'ぱ': 'pa', 'ぴ': 'pi', 'ぷ': 'pu', 'ぺ': 'pe', 'ぽ': 'po',
-  'っ': ''
-};
 
 function toRomaji(sentence) {
   return sentence.split(/(\s+)/).map((part) => {

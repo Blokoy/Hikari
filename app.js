@@ -1,11 +1,12 @@
 import { quizQuestions, initialKanaQuizQuestions } from './js/data/quiz-data.js';
 import { kanaCharts, kanaCombinations } from './js/data/kana-data.js';
 import { sentenceExamples, romajiWords, kanaRomaji } from './js/data/sentence-data.js';
+import { escapeHtml, shuffleItems } from './js/utils.js';
+import { closeModals, openModal, showToast } from './js/modals.js';
 
 const navItems = document.querySelectorAll('.nav-item');
 const views = document.querySelectorAll('.page-view');
 const breadcrumbTitle = document.querySelector('#breadcrumb-title');
-const toast = document.querySelector('#toast');
 const sidebar = document.querySelector('.sidebar');
 const menuButton = document.querySelector('.menu-button');
 const sourceVerbSections = [...document.querySelectorAll('.verb-section')].filter((section) => !section.closest('#verbs-view'));
@@ -24,18 +25,6 @@ navItems.forEach((item) => item.addEventListener('click', () => { showView(item.
 document.querySelectorAll('[data-view]').forEach((item) => item.addEventListener('click', () => showView(item.dataset.view)));
 menuButton.addEventListener('click', () => sidebar.classList.toggle('mobile-open'));
 
-function openModal(id) {
-  const modal = document.querySelector(`#${id}`);
-  modal.classList.add('show');
-  modal.setAttribute('aria-hidden', 'false');
-}
-function closeModals() {
-  document.querySelectorAll('.modal-backdrop').forEach((modal) => {
-    modal.classList.remove('show');
-    modal.setAttribute('aria-hidden', 'true');
-  });
-}
-
 document.querySelectorAll('[data-action="start-lesson"]').forEach((button) => button.addEventListener('click', () => openModal('lesson-modal')));
 document.querySelectorAll('[data-action="open-quiz"]').forEach((button) => button.addEventListener('click', () => { activeQuizQuestions = shuffleItems(quizQuestions); currentQuestion = 0; document.querySelector('#quiz-section').textContent = 'GENERAL'; clearKanaWorksheet(); loadQuestion(0); closeModals(); openModal('quiz-modal'); }));
 document.querySelectorAll('[data-action="close-modal"]').forEach((button) => button.addEventListener('click', closeModals));
@@ -44,15 +33,6 @@ document.querySelectorAll('.modal-backdrop').forEach((modal) => modal.addEventLi
 let kanaQuizQuestions = initialKanaQuizQuestions;
 let activeQuizQuestions = quizQuestions;
 let currentQuestion = 0;
-
-function shuffleItems(items) {
-  const shuffledItems = [...items];
-  for (let itemIndex = shuffledItems.length - 1; itemIndex > 0; itemIndex -= 1) {
-    const swapIndex = Math.floor(Math.random() * (itemIndex + 1));
-    [shuffledItems[itemIndex], shuffledItems[swapIndex]] = [shuffledItems[swapIndex], shuffledItems[itemIndex]];
-  }
-  return shuffledItems;
-}
 
 function loadQuestion(index) {
   const question = activeQuizQuestions[index];
@@ -97,8 +77,7 @@ document.querySelector('#quiz-answers').addEventListener('click', (event) => {
   if (answer.dataset.answer === 'correct') {
     answer.classList.add('correct-answer');
     result.innerHTML = `Correct. ${question.feedback} <button class="quiz-action" data-quiz-action="next">${currentQuestion === activeQuizQuestions.length - 1 ? 'Finish session' : 'Next question'} <span>→</span></button>`;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2800);
+    showToast();
   } else {
     answer.classList.add('wrong-answer');
     result.innerHTML = `Not quite. ${question.feedback} <button class="quiz-action" data-quiz-action="retry">Try again</button>`;
@@ -207,10 +186,6 @@ document.querySelector('#dictionary-input').addEventListener('input', (event) =>
 const sentenceInput = document.querySelector('#sentence-input');
 const checkerResult = document.querySelector('#checker-result');
 let sentenceExampleIndex = 0;
-
-function escapeHtml(value) {
-  return value.replace(/[&<>"']/g, (character) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;' })[character]);
-}
 
 function analyzeSentence(sentence) {
   const errors = [];

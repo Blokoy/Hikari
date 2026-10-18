@@ -9,7 +9,7 @@
 ╚═╝  ╚═╝╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝
 ```
 
-Hikari a lightweight Japanese study dashboard for building N5 foundations one clear step at a time.
+Hikari is a lightweight Japanese study dashboard for building N5 foundations one clear step at a time.
 
 ## Features
 
@@ -36,7 +36,35 @@ You can also open `index.html` directly, though a local server is recommended fo
 
 - `index.html` - application markup and lesson content
 - `style.css` - layout, responsive styles, and visual design
-- `app.js` - navigation, dictionary search, kana charts, and quiz interactions
+- `app.js` - small application entry point that initializes the feature modules
+- `js/navigation.js` - page navigation, breadcrumbs, sidebar behavior, and verb-section visibility
+- `js/modals.js` - lesson and quiz modal controls plus toast notifications
+- `js/dictionary.js` - live dictionary search and word-card filtering
+- `js/sentence-checker.js` - sentence analysis, highlighted feedback, tips, and local romaji output
+- `js/quiz.js` - shared general quiz state, question flow, answer feedback, retry, and progress handling
+- `js/kana.js` - kana charts, kana question generation, worksheets, scoring, and kana quiz categories
+- `js/utils.js` - shared HTML escaping and array shuffling helpers
+- `js/data/` - static quiz, kana, and sentence-checker data
+
+The app uses native browser ES modules and has no build tool or package manager. Keep
+`app.js` as the entry point and initialize new feature behavior from a dedicated module.
+Feature modules query the DOM elements they own rather than relying on a shared DOM module.
+
+## Manual verification
+
+After making changes, start the local server and check the browser console for errors:
+
+```bash
+python3 -m http.server 8000
+```
+
+The main regression areas are:
+
+- Navigate through the sidebar and verify the mobile sidebar can scroll.
+- Search the dictionary, clear the search, and check a no-results query.
+- Run a general quiz with a wrong answer, retry, next question, and finish toast.
+- Open both kana charts and run basic, dakuten, and combination quizzes for Hiragana and Katakana.
+- Enter valid and invalid Japanese sentences, confirm highlighted feedback, and check the romaji line.
 
 ## N5 Roadmap
 

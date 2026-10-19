@@ -5,7 +5,7 @@ N5 data of OpenJLPT (https://github.com/evanclan/OpenJLPT) by evanclan,
 licensed under CC BY-SA 4.0:
 https://creativecommons.org/licenses/by-sa/4.0/
 
-Changes made: some fields removed (kanji: nanori, radical_number) and
+Changes made: some fields removed (vocabulary: level; kanji: nanori, radical_number) and
 the data re-saved as compact JSON for use in Hikari.
 
 These adapted files are also licensed under CC BY-SA 4.0.

@@ -11,7 +11,6 @@ from typing import Any
 TOOLS_DIR = Path(__file__).parent
 SOURCE_DIR = TOOLS_DIR / "source"
 DATA_DIR = TOOLS_DIR.parent / "data"
-VOCAB_SOURCE = SOURCE_DIR / "n5-vocab.json"
 
 
 def find_source(pattern: str) -> Path:
@@ -31,7 +30,7 @@ def load_json(path: Path) -> Any:
 def main() -> None:
     if hasattr(sys.stdout, "reconfigure"):
         sys.stdout.reconfigure(encoding="utf-8")
-    vocab = load_json(VOCAB_SOURCE)
+    vocab = load_json(DATA_DIR / "vocab.json")
     kanji = load_json(DATA_DIR / "kanji.json")
     jmdict = load_json(find_source("jmdict-eng*.json"))
     kanjidic = load_json(find_source("kanjidic2-en*.json"))

@@ -23,6 +23,7 @@ VOCAB_FIELDS = (
     "romaji",
     "meanings",
     "pos",
+    "jmdict_id",
     "other_forms",
     "other_readings",
     "examples",

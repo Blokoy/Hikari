@@ -25,26 +25,23 @@ Hikari is a lightweight Japanese study dashboard for building N5 foundations one
 No build step or dependencies are required. From this directory, start a local server:
 
 ```bash
-python3 -m http.server 8000
+python -m http.server 8000
 ```
 
 Then open [http://localhost:8000](http://localhost:8000) in your browser.
 
-You can also open `index.html` directly, though a local server is recommended for consistent browser behavior.
+The local server is required because the app uses ES modules and fetches data files.
 
 ## Project files
 
 - `index.html` - application markup and lesson content
 - `style.css` - layout, responsive styles, and visual design
 - `app.js` - small application entry point that initializes the feature modules
-- `js/navigation.js` - page navigation, breadcrumbs, sidebar behavior, and verb-section visibility
-- `js/modals.js` - lesson and quiz modal controls plus toast notifications
-- `js/dictionary.js` - live dictionary search and word-card filtering
-- `js/sentence-checker.js` - sentence analysis, highlighted feedback, tips, and local romaji output
-- `js/quiz.js` - shared general quiz state, question flow, answer feedback, retry, and progress handling
-- `js/kana.js` - kana charts, kana question generation, worksheets, scoring, and kana quiz categories
-- `js/utils.js` - shared HTML escaping and array shuffling helpers
-- `js/data/` - static quiz, kana, and sentence-checker data
+- `js/` - feature modules, shared data loading, utilities, and static data modules
+- `data/vocab.json` - generated N5 vocabulary data
+- `data/kanji.json` - generated N5 kanji data
+- `data/NOTICE.md` - attribution and licensing notice for the generated data
+- `tools/` - data build and validation scripts
 
 The app uses native browser ES modules and has no build tool or package manager. Keep
 `app.js` as the entry point and initialize new feature behavior from a dedicated module.
@@ -55,7 +52,7 @@ Feature modules query the DOM elements they own rather than relying on a shared 
 After making changes, start the local server and check the browser console for errors:
 
 ```bash
-python3 -m http.server 8000
+python -m http.server 8000
 ```
 
 The main regression areas are:
@@ -65,6 +62,27 @@ The main regression areas are:
 - Run a general quiz with a wrong answer, retry, next question, and finish toast.
 - Open both kana charts and run basic, dakuten, and combination quizzes for Hiragana and Katakana.
 - Enter valid and invalid Japanese sentences, confirm highlighted feedback, and check the romaji line.
+
+## Data and credits
+
+The files in `data/` are adapted from [OpenJLPT](https://github.com/evanclan/OpenJLPT)
+by evanclan and are licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+The source data is built from [JMdict and KANJIDIC2 (EDRDG)](https://www.edrdg.org/),
+[Jonathan Waller's JLPT lists](https://www.tanos.co.uk/jlpt/), and
+[Tatoeba](https://tatoeba.org). See [data/NOTICE.md](./data/NOTICE.md) for the
+complete attribution and licensing details.
+
+To rebuild the generated files, download the two OpenJLPT N5 files into
+`tools/source/`, then run:
+
+```bash
+python tools/build_data.py
+```
+
+## License
+
+The data is licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/);
+see [data/NOTICE.md](./data/NOTICE.md). The code license has not been chosen yet.
 
 ## N5 Roadmap
 
